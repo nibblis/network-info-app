@@ -16,4 +16,7 @@ interface NetworkDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(networks: List<Network>)
+
+    @Query("DELETE FROM networks")
+    suspend fun clearAll()
 }

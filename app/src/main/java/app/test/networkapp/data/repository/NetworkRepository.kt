@@ -27,4 +27,11 @@ class NetworkRepository(
         val cachedNetwork = networkDao.searchByIp(inetnum).firstOrNull()
         return cachedNetwork ?: throw NetworkNotFoundException()
     }
+
+    /**
+     * Clears all network data from the local cache (database).
+     */
+    suspend fun clearCache() {
+        networkDao.clearAll()
+    }
 }
