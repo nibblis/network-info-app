@@ -1,6 +1,8 @@
 package app.test.networkapp.di
 
 import app.test.networkapp.data.remote.RipeApiService
+import app.test.networkapp.di.interceptor.ErrorResponseInterceptor
+import app.test.networkapp.di.interceptor.RetryInterceptor
 import app.test.networkapp.utils.LoggingEventListener
 import okhttp3.EventListener
 import okhttp3.OkHttpClient
@@ -19,6 +21,10 @@ val networkModule = module {
 
     single {
         OkHttpClient.Builder()
+            // Interceptor to convert HTTP errors (4xx, 5xx) to specific exceptions.
+            .addInterceptor(ErrorResponseInterceptor())
+            // Interceptor to automatically retry failed requests (5xx, network issues).
+            .addInterceptor(RetryInterceptor())
             // HttpLoggingInterceptor is great for seeing the request/response body and headers.
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
