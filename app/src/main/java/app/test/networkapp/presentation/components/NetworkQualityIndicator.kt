@@ -1,14 +1,21 @@
 package app.test.networkapp.presentation.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -20,14 +27,14 @@ import androidx.compose.ui.unit.dp
 import app.test.networkapp.presentation.theme.NetworkAppTheme
 
 /**
- * A custom UI component to visually represent network quality.
+ * A custom UI component to visually represent network quality with smooth animations.
  *
  * This component demonstrates:
- * - A clear public API: It takes a `quality` level and a `modifier`.
- * - A well-defined state contract: The number of active bars directly maps to the `quality` input.
- * - Custom drawing: It uses `Canvas`, the modern equivalent of `onDraw`.
- * - Efficiency: It avoids unnecessary recompositions because its inputs (`Int`, `Modifier`) are stable.
- * - Safety: Being a stateless composable, it's protected against memory leaks.
+ * - Animation: Uses `animateColorAsState` for smooth transitions, showcasing basic animation skills.
+ * - Timing Functions: Implements a `tween` AnimationSpec with an `easing` function (interpolator).
+ * - Cancellation & Efficiency: The animation correctly handles interruption and is efficient, preventing jank by only re-triggering drawing commands and avoiding unnecessary allocations.
+ * - A clear public API: Takes a `quality` level and a `modifier`.
+ * - Custom drawing: Uses `Canvas`, the modern equivalent of `onDraw`.
  *
  * @param quality The quality level to display, from 0 (no bars) to 4 (all bars).
  * @param modifier The modifier to be applied to the component.
@@ -45,17 +52,25 @@ fun NetworkQualityIndicator(
 ) {
     val clampedQuality = quality.coerceIn(0, 4)
 
+    // Create a list of animated colors. This is done in the Composable context.
+    val animatedColors = (0 until 4).map { i ->
+        animateColorAsState(
+            targetValue = if (i < clampedQuality) barColor else inactiveBarColor,
+            animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
+            label = "barColorAnimation_$i"
+        )
+    }
+
     Canvas(modifier = modifier) {
         val canvasHeight = size.height
         val cornerRadius = CornerRadius(barWidth.toPx() / 2, barWidth.toPx() / 2)
 
-        // Draw 4 bars, coloring them based on the quality level.
         for (i in 0 until 4) {
             val barHeightFraction = (i + 1) * 0.25f
             val barHeight = canvasHeight * barHeightFraction
 
             drawRoundRect(
-                color = if (i < clampedQuality) barColor else inactiveBarColor,
+                color = animatedColors[i].value,
                 topLeft = Offset(x = i * (barWidth.toPx() * 2), y = canvasHeight - barHeight),
                 size = Size(width = barWidth.toPx(), height = barHeight),
                 cornerRadius = cornerRadius
@@ -66,25 +81,28 @@ fun NetworkQualityIndicator(
 
 /**
  * A preview function to demonstrate the `NetworkQualityIndicator` in various states.
- * This is a great way to test and showcase UI components without running the full app.
+ * It now includes an interactive example to showcase the animation.
  */
 @Preview(showBackground = true, name = "Network Quality Examples")
 @Composable
 private fun NetworkQualityIndicatorPreview() {
+    var interactiveQuality by remember { mutableIntStateOf(2) }
+
     NetworkAppTheme {
         Row(modifier = Modifier.padding(16.dp)) {
+            // Static examples
             NetworkQualityIndicator(quality = 0, modifier = Modifier.height(24.dp))
-            Spacer(modifier = Modifier.width(16.dp))
-            NetworkQualityIndicator(quality = 1, modifier = Modifier.height(24.dp))
-            Spacer(modifier = Modifier.width(16.dp))
-            NetworkQualityIndicator(quality = 2, modifier = Modifier.height(24.dp))
-            Spacer(modifier = Modifier.width(16.dp))
-            NetworkQualityIndicator(quality = 3, modifier = Modifier.height(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
             NetworkQualityIndicator(quality = 4, modifier = Modifier.height(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
-            // Example with different size
-            NetworkQualityIndicator(quality = 4, modifier = Modifier.size(width = 60.dp, height = 48.dp))
+
+            // Interactive example to see the animation
+            NetworkQualityIndicator(
+                quality = interactiveQuality,
+                modifier = Modifier
+                    .height(24.dp)
+                    .clickable { interactiveQuality = (interactiveQuality + 1) % 5 }
+            )
         }
     }
 }
