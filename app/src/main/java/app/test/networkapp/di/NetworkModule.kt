@@ -15,6 +15,12 @@ val networkModule = module {
             .addInterceptor(HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             })
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Accept", "application/json")
+                    .build()
+                chain.proceed(request)
+            }
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .build()

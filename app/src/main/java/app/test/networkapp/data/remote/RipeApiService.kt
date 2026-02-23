@@ -6,7 +6,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface RipeApiService {
-    @GET("/search.json")
+    @GET("/search")
     suspend fun searchOrganizations(
         @Query("query-string") query: String,
         @Query("source") source: String = "ripe",
@@ -19,7 +19,7 @@ interface RipeApiService {
         @Path("orgId") orgId: String
     ): RipeSearchResponse
 
-    @GET("/search.json")
+    @GET("/search")
     suspend fun searchNetworksByOrganization(
         @Query("inverse-attribute") inverseAttribute: String = "org",
         @Query("type-filter") typeFilter: String = "inetnum",
@@ -28,7 +28,7 @@ interface RipeApiService {
         @Query("flags") flags: String = "no-referenced",
     ): RipeSearchResponse
 
-    @GET("/search.json")
+    @GET("/search")
     suspend fun searchNetworkByIp(
         @Query("query-string") ipAddress: String,
         @Query("source") source: String = "ripe",
