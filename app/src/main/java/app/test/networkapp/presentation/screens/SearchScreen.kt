@@ -18,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +36,8 @@ fun SearchScreen(
     onOrganizationSelected: (String) -> Unit,
     onNetworkSelected: (String) -> Unit,
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    // Use rememberSaveable to ensure the search query survives process death and configuration changes.
+    var searchQuery by rememberSaveable { mutableStateOf("") }
 
     val searchResult by viewModel.state.collectAsState()
 
