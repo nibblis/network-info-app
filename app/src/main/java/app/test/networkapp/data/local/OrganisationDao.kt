@@ -5,9 +5,13 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import app.test.networkapp.data.models.Organization
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface OrganizationDao {
+    @Query("SELECT * FROM organizations ORDER BY name ASC")
+    fun getAll(): Flow<List<Organization>>
+
     @Query("SELECT * FROM organizations WHERE name LIKE '%' || :name || '%'")
     suspend fun searchByName(name: String): List<Organization>
 

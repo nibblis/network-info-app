@@ -8,12 +8,19 @@ import app.test.networkapp.data.models.Organization
 import app.test.networkapp.data.remote.RipeApiService
 import app.test.networkapp.utils.extracOrganizations
 import app.test.networkapp.utils.extractNetworks
+import kotlinx.coroutines.flow.Flow
 
 class OrganizationRepository(
     private val apiService: RipeApiService,
     private val organizationDao: OrganizationDao,
     private val networkDao: NetworkDao,
 ) {
+    fun getOrganizations(): Flow<List<Organization>> {
+        // Этот метод напрямую возвращает Flow из Room.
+        // UI будет автоматически обновляться при любых изменениях в таблице organizations.
+        return organizationDao.getAll()
+    }
+
     suspend fun searchOrganizationByName(name: String): List<Organization> {
 
         val cachedOrgs = organizationDao.searchByName(name)
