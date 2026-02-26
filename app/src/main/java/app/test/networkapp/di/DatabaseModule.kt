@@ -11,7 +11,13 @@ val databaseModule = module {
             androidContext(),
             AppDatabase::class.java,
             "ip_lookup_database"
-        ).build()
+        )
+        // ВАЖНО: fallbackToDestructiveMigration() удаляет все данные пользователя
+        // при изменении схемы. Это приемлемо для отладки, но в продакшене
+        // здесь должны быть прописаны миграции через .addMigrations().
+        // Линтер часто помечает это как предупреждение.
+        .fallbackToDestructiveMigration()
+        .build()
     }
 
     single { get<AppDatabase>().organizationDao() }
